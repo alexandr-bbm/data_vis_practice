@@ -6,7 +6,7 @@ from lab1.util.view_tables import DeptsViewTableMixin, EmployeesViewTableMixin, 
 
 
 def index(request):
-    return render(request, 'index.html')
+    return render(request, 'lab1/index.html')
 
 
 DeptsView = create_filtered_list_view(

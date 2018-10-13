@@ -21,7 +21,7 @@ def create_filtered_list_view(db_model, filter_fields, table_mixin=EmptyTableMix
             fields = filter_fields
 
     class FilteredListView(SingleTableMixin, FilterView):
-        template_name = 'generic_table.html'
+        template_name = 'lab1/generic_table.html'
         model = db_model
 
         table_class = Table
