@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'lab1.apps.Lab1Config',
     'lab2.apps.Lab2Config',
+    'course_work.apps.CourseWorkConfig',
     'django_tables2',
     'django_filters',
     'bootstrap3',

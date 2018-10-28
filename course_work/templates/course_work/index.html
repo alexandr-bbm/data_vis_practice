@@ -1,0 +1,11 @@
+{% extends "course_work/base.html" %}
+{% load bootstrap3 %}
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-8">
+            {% bootstrap_button "Tables" href="/lab1" %}
+            {% bootstrap_button "Charts" href="/lab2" %}
+            {% bootstrap_button "Map" href="/course_work/map" %}
+        </div>
+    </div>
+{% endblock %}
