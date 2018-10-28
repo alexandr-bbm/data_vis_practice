@@ -1,5 +1,7 @@
 import os
 
+from django.contrib.gis.geos import Point
+
 
 def run():
     clear_db()
@@ -21,18 +23,18 @@ def populate_db():
         {'name': 'Europe'},
     ])
     depts = create_model_instances(Dept, [
-        {'name': 'Administration', 'region': regions[0]},
-        {'name': 'Finance', 'region': regions[0]},
-        {'name': 'Sales', 'region': regions[0]},
-        {'name': 'Sales', 'region': regions[1]},
-        {'name': 'Sales', 'region': regions[2]},
-        {'name': 'Sales', 'region': regions[3]},
-        {'name': 'Sales', 'region': regions[4]},
-        {'name': 'Operations', 'region': regions[0]},
-        {'name': 'Operations', 'region': regions[1]},
-        {'name': 'Operations', 'region': regions[2]},
-        {'name': 'Operations', 'region': regions[3]},
-        {'name': 'Operations', 'region': regions[4]},
+        {'region': regions[0], 'geo_coords': Point(38.881799, -77.018364), 'name': 'Administration', },
+        {'region': regions[0], 'geo_coords': Point(38.933656, -77.065035), 'name': 'Finance', },
+        {'region': regions[0], 'geo_coords': Point(38.886525, -76.988218), 'name': 'Sales', },
+        {'region': regions[1], 'geo_coords': Point(6.232213, -75.554030), 'name': 'Sales', },
+        {'region': regions[2], 'geo_coords': Point(26.713333, 20.111205), 'name': 'Sales', },
+        {'region': regions[3], 'geo_coords': Point(32.120960, 110.880505), 'name': 'Sales', },
+        {'region': regions[4], 'geo_coords': Point(34.687161, 33.047102), 'name': 'Sales', },
+        {'region': regions[0], 'geo_coords': Point(85.3240, 27.7172), 'name': 'Operations', },
+        {'region': regions[1], 'geo_coords': Point(3.399982, -76.431565), 'name': 'Operations', },
+        {'region': regions[2], 'geo_coords': Point(25.020791, 28.635636), 'name': 'Operations', },
+        {'region': regions[3], 'geo_coords': Point(56.477242, 84.991905), 'name': 'Operations', },
+        {'region': regions[4], 'geo_coords': Point(41.827361, 14.022168), 'name': 'Operations', },
     ])
 
     dept_admin = depts[0]
@@ -116,6 +118,44 @@ def populate_db():
         {'customer': customer1, 'date_ordered': '2018-09-14T12:35:01.828Z', 'date_shipped': '2018-09-29T12:35:01.828Z', 'total': 1400},
     ])
 
+    order1 = orders[0]
+    order2 = orders[1]
+    order3 = orders[2]
+
+    products = create_model_instances(Product, [
+        {'name': 'Football ball', 'short_descr': 'description. '},
+        {'name': 'Basketball ball', 'short_descr': 'description. '},
+        {'name': 'Golf ball', 'short_descr': 'description. '},
+        {'name': 'Tenis ball', 'short_descr': 'description. '},
+    ])
+
+    product1 = products[0]
+    product2 = products[1]
+    product3 = products[2]
+    product4 = products[4]
+
+
+    items = create_model_instances(Item, [
+        {'order': order1, 'product': product1, 'quantity_ordered': 5, 'quantity_shipped': 1},
+        {'order': order1, 'product': product2, 'quantity_ordered': 5, 'quantity_shipped': 1},
+        {'order': order2, 'product': product3, 'quantity_ordered': 5, 'quantity_shipped': 1},
+        {'order': order2, 'product': product4, 'quantity_ordered': 5, 'quantity_shipped': 1},
+        {'order': order2, 'product': product1, 'quantity_ordered': 5, 'quantity_shipped': 1},
+        {'order': order3, 'product': product2, 'quantity_ordered': 5, 'quantity_shipped': 1},
+        {'order': order3, 'product': product3, 'quantity_ordered': 5, 'quantity_shipped': 1},
+        {'order': order3, 'product': product4, 'quantity_ordered': 5, 'quantity_shipped': 1},
+        {'order': order1, 'product': product1, 'quantity_ordered': 5, 'quantity_shipped': 1},
+        {'order': order1, 'product': product1, 'quantity_ordered': 3, 'quantity_shipped': 2},
+        {'order': order1, 'product': product2, 'quantity_ordered': 3, 'quantity_shipped': 2},
+        {'order': order2, 'product': product3, 'quantity_ordered': 3, 'quantity_shipped': 2},
+        {'order': order2, 'product': product4, 'quantity_ordered': 3, 'quantity_shipped': 2},
+        {'order': order2, 'product': product1, 'quantity_ordered': 3, 'quantity_shipped': 2},
+        {'order': order3, 'product': product2, 'quantity_ordered': 3, 'quantity_shipped': 2},
+        {'order': order3, 'product': product3, 'quantity_ordered': 5, 'quantity_shipped': 1},
+        {'order': order3, 'product': product4, 'quantity_ordered': 5, 'quantity_shipped': 1},
+        {'order': order1, 'product': product1, 'quantity_ordered': 5, 'quantity_shipped': 1},
+    ])
+
 
 def create_model_instances(model, data):
     result = []
@@ -133,5 +173,6 @@ if __name__ == '__main__':
     os.environ.setdefault('DJANGO_SETTINGS_MODULE',
                           'data_vis_practice.settings')
     django.setup()
-    from lab1.models import Region, Dept, Employee, Customer, Order
+    from lab1.models import Region, Dept, Employee, Customer, Order, Product, Item
+
     run()
