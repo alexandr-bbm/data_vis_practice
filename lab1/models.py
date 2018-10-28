@@ -1,4 +1,4 @@
-from django.contrib.gis.db import models
+from django.db import models
 
 
 class Region(models.Model):
@@ -8,7 +8,8 @@ class Region(models.Model):
 class Dept(models.Model):
     name = models.CharField(max_length=200)
     region = models.ForeignKey(Region, on_delete=models.SET_NULL, null=True)
-    geo_coords = models.PointField()
+    lat = models.FloatField(null=True)
+    lon = models.FloatField(null=True)
 
     class Meta:
         verbose_name = 'Department'
@@ -45,6 +46,6 @@ class Product(models.Model):
 class Item(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity_ordered = models.DateTimeField()
-    quantity_shipped = models.DateTimeField()
+    quantity_ordered = models.IntegerField()
+    quantity_shipped = models.IntegerField()
     price = models.DecimalField(max_digits=6, decimal_places=2)
