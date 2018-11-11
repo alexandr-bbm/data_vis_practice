@@ -1,0 +1,44 @@
+{% extends "lab2/base.html" %}
+{% load bootstrap3 %}
+{% block js %}
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawCharts);
+
+      function drawCharts() {
+        const server_data = {{ employees_per_dept|safe }};
+{#        const server_data = [#}
+{#          ['Sales', 6],#}
+{#          ['Marketing', 12],#}
+{#          ['Finance', 3],#}
+{#        ];#}
+        const data = new google.visualization.DataTable();
+        data.addColumn('string', 'Dept');
+        data.addColumn('number', 'Number of employees');
+        data.addRows(server_data);
+
+        const options = {
+          title:'Employees per dept',
+          width: 900,
+          height: 400,
+        };
+
+        const chartPie = new google.visualization.PieChart(document.getElementById('chart_pie'));
+        chartPie.draw(data, options);
+      }
+    </script>
+{% endblock %}
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-8 mt-3 mb-3">
+            {% bootstrap_button "Back" href="/lab2" %}
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-8 mt-3 mb-3">
+            <div id="chart_pie" class="chart-container"></div>
+        </div>
+    </div>
+
+{% endblock %}

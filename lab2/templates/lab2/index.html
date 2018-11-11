@@ -1,77 +1,21 @@
+{% extends "lab2/base.html" %}
 {% load bootstrap3 %}
-<html lang="en">
-<head>
-    <title>Data Visualization lab 2</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    {% bootstrap_css %}
-    <style>
-        h1 {
-            text-align: center;
-        }
-        .chart-container {
-            display: flex;
-            justify-content: center;
-        }
-    </style>
-    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript">
-      google.charts.load('current', {'packages':['corechart']});
-      google.charts.setOnLoadCallback(drawCharts);
-
-      function drawCharts() {
-        const server_data = {{ date_vs_orders_count|safe }};
-        const prepared = server_data.map(([t, c]) => [new Date(t), c]);
-        var data = new google.visualization.DataTable();
-        data.addColumn('date', 'Date');
-        data.addColumn('number', 'Number of orders');
-        data.addRows(prepared);
-
-        var ticks = [];
-        for (var i = 0; i < data.getNumberOfRows(); i++) {
-          ticks.push(data.getValue(i, 0));
-        }
-
-        const options = {
-          title:'Number of orders',
-          width: 900,
-          height: 400,
-          hAxis: {
-            format: 'dd.MM.yyyy',
-            ticks,
-          }
-        };
-
-        const chartLine = new google.visualization.LineChart(document.getElementById('chart_line'));
-        chartLine.draw(data, options);
-
-        const chartLineTrend = new google.visualization.ScatterChart(document.getElementById('chart_line_trend'));
-        chartLineTrend.draw(data, {...options, trendlines: { 0: {} }});
-
-        const chartHistorgram = new google.visualization.ColumnChart(document.getElementById('chart_histogram'));
-        chartHistorgram.draw(data, options);
-      }
-    </script>
-</head>
-<body>
-<div>
-    <div>
-        <h1>Data Visualization lab 2</h1>
-        <h1>Number of orders per date</h1>
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-8 mt-3 mb-3">
+            {% bootstrap_button "Home" href="/course_work" %}
+        </div>
     </div>
-    <div>
-        <h1>Linear plot</h1>
-        <div id="chart_line" class="chart-container"></div>
+    <div class="row justify-content-center">
+        <div class="col-8 mt-3 mb-3">
+            <h1 style="text-align: center;">Choose data for chart</h1>
+        </div>
     </div>
-    <div>
-        <h1>Linear approximation plot</h1>
-        <div id="chart_line_trend" class="chart-container"></div>
+    <div class="row justify-content-center">
+        <div class="col-8">
+            {% bootstrap_button "Orders per date" href="/lab2/orders_per_date" %}
+            {% bootstrap_button "Employees per dept" href="/lab2/employees_per_dept" %}
+            {% bootstrap_button "Avg salary per dept" href="/lab2/avg_salary_per_dept" %}
+        </div>
     </div>
-    <div>
-        <h1>Histogram plot</h1>
-        <div id="chart_histogram" class="chart-container"></div>
-    </div>
-</div>
-{#{% bootstrap_javascript %}#}
-</body>
-</html>
+{% endblock %}

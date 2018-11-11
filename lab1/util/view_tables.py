@@ -11,6 +11,7 @@ class EmployeesViewTableMixin(tables.Table):
 
 
 class CustomersViewTableMixin(tables.Table):
+    region = tables.Column(accessor='region.name', verbose_name='Region Name')
     sales_rep = tables.Column(accessor='sales_rep.last_name', verbose_name='Sales Rep Last name')
 
 

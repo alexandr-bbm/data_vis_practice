@@ -2,11 +2,16 @@
 {% with title="Data Visualization Course Work" %}
 <html lang="en">
 <head>
-{#    <title>Data Visualization lab 1</title>#}
     <title>{{ title }}</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     {% bootstrap_css %}
+    {% block js %}{% endblock %}
+    <style>
+        h1.title {
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
