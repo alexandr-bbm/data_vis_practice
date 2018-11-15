@@ -17,10 +17,17 @@ Including another URLconf
 """
 from django.conf.urls import url
 from django.contrib import admin
+from django.conf import settings
+from django.conf.urls.static import static
+
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     path('lab1/', include('lab1.urls')),
     path('lab2/', include('lab2.urls')),
+    path('lab3/', include('lab3.urls')),
     path('course_work/', include('course_work.urls')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
