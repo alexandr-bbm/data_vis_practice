@@ -1,0 +1,22 @@
+{% load bootstrap3 %}
+<html lang="en">
+<head>
+    <title>Data Visualization Course Work</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    {% bootstrap_css %}
+    {% block css %}{% endblock %}
+</head>
+<body>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-8 mt-3 mb-3">
+            <h1 style="text-align: center;">Data Visualization Lab 4</h1>
+        </div>
+    </div>
+    {% block content %}{% endblock %}
+</div>
+{% block js %}{% endblock %}
+{% bootstrap_javascript %}
+</body>
+</html>

@@ -1,0 +1,234 @@
+{% extends "lab4/base.html" %}
+{% load bootstrap3 %}
+{% block css %}
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="row justify-content-center">
+        <div class="col-8">
+            <form class="form" id="filter-form">
+                <div class="form-group">
+                    <div>
+                        <label class="">
+                            Month
+                        </label>
+                    </div>
+                    {% for month_option in month_options %}
+                        <label class="radio-inline">
+                            <input
+                                type="radio"
+                                name="date__value__iexact"
+                                value="{{ month_option.value }}"
+                                {% if forloop.first %}
+                                    checked
+                                {% endif %}
+                            >
+                            {{ month_option.title }}
+                        </label>
+                    {% endfor %}
+                 </div>
+                <div class="form-group">
+                    <label class="" for="value__gt">
+                        Temperature greater than (Celsius)
+                    </label>
+                    <input
+                        type="text"
+                        name="value__gt"
+                        class="form-control"
+                        value="-50"
+                        title=""
+                    >
+                 </div>
+                <div class="form-group">
+                    <label class="" for="value__lt">
+                        Temperature less than (Celsius)
+                    </label>
+                    <input
+                        type="text"
+                        name="value__lt"
+                        class="form-control"
+                        value="50"
+                        title=""
+                    >
+                 </div>
+                {% bootstrap_button 'Submit' id='filter-form-button' %}
+            </form>
+        </div>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-8">
+            <h1 style="text-align: center;">2 level temperature on map</h1>
+            <div id="map"></div>
+        </div>
+    </div>
+{% endblock %}
+{% block js %}
+    <script
+            src="https://code.jquery.com/jquery-2.2.4.min.js"
+            integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+            crossorigin="anonymous"></script>
+    <script>
+      const GRID_STEP = 0.25;
+      const WEATHER_COLORS = ['#0500ff', '#0400ff', '#0300ff', '#0200ff', '#0100ff', '#0000ff', '#0002ff', '#0012ff', '#0022ff', '#0032ff', '#0044ff', '#0054ff', '#0064ff', '#0074ff', '#0084ff', '#0094ff', '#00a4ff', '#00b4ff', '#00c4ff', '#00d4ff', '#00e4ff', '#00fff4', '#00ffd0', '#00ffa8', '#00ff83', '#00ff5c', '#00ff36', '#00ff10', '#17ff00', '#3eff00', '#65ff00', '#8aff00', '#b0ff00', '#d7ff00', '#fdff00', '#FFfa00', '#FFf000', '#FFe600', '#FFdc00', '#FFd200', '#FFc800', '#FFbe00', '#FFb400', '#FFaa00', '#FFa000', '#FF9600', '#FF8c00', '#FF8200', '#FF7800', '#FF6e00', '#FF6400', '#FF5a00', '#FF5000', '#FF4600', '#FF3c00', '#FF3200', '#FF2800', '#FF1e00', '#FF1400', '#FF0a00', '#FF0000', '#FF0010', '#FF0020', '#FF0030', '#FF0040', '#FF0050'];
+      const MIN_TEMP_KELVIN = 220;
+      const MAX_TEMP_KELVIN = 323;
+
+      let map;
+      let infoWindow;
+      let heatmap_rectangles = [];
+      let $form;
+      let $formButton;
+
+      bindElements();
+
+      function initMap() {
+        map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 8,
+          center: new google.maps.LatLng(34.687161, 33.047102), // Cyprus
+          minZoom: 5
+        });
+        infoWindow = new google.maps.InfoWindow();
+
+        // pan/zoom
+        google.maps.event.addListener(map, 'idle', () => {
+          loadAndUpdateT2mData()
+        });
+      }
+
+      function bindElements() {
+        $form = $('#filter-form');
+        $form.on('submit', (e) => {
+          e.preventDefault();
+          loadAndUpdateT2mData();
+        });
+        $formButton = $('#filter-form-button');
+      }
+
+      function loadAndUpdateT2mData() {
+        disableButton();
+        const {
+          south: lat_min,
+          west: lon_min,
+          north: lat_max,
+          east: lon_max
+        } = map.getBounds().toJSON();
+        const {
+          date__value__iexact,
+          value__gt,
+          value__lt,
+        } = getFormValues();
+
+        loadT2mData({
+          lat_min,
+          lat_max,
+          lon_min,
+          lon_max,
+          date__value__iexact,
+          value__gt,
+          value__lt,
+        })
+          .then(response => {
+            if (response.t2m) {
+              updateHeatmap(response.t2m);
+            }
+            enableButton();
+          })
+      }
+
+      function updateHeatmap(t2ms) {
+        if (heatmap_rectangles) {
+          heatmap_rectangles.forEach(rectangle => rectangle.setMap(null));
+          heatmap_rectangles = [];
+        }
+
+        t2ms.forEach(item => {
+          const {
+            value,
+            lon__value,
+            lat__value,
+          } = item;
+          const halfGrid = GRID_STEP / 2;
+          const rectangle = new google.maps.Rectangle({
+            strokeWeight: 0,
+            fillColor: getTemperatureColor(value),
+            fillOpacity: 0.5,
+            map: map,
+            bounds: {
+              north: lat__value + halfGrid,
+              south: lat__value - halfGrid,
+              east: lon__value + halfGrid,
+              west: lon__value - halfGrid,
+            }
+          });
+
+          rectangle.addListener('click', event => {
+            const displayTemperature = toCelsius(value).toFixed(1);
+            const contentString = `<div>Temperature (Celsius): ${displayTemperature}</div>`;
+            infoWindow.setContent(contentString);
+            infoWindow.setPosition(event.latLng);
+            infoWindow.open(map);
+          });
+
+          heatmap_rectangles.push(rectangle);
+        });
+
+      }
+
+      function loadT2mData(params = {}) {
+        const {
+          lat_min,
+          lat_max,
+          lon_min,
+          lon_max,
+          value__lt,
+          value__gt,
+          date__value__iexact,
+        } = params;
+
+        const request_params = {
+          lon__value__gt: lon_min - GRID_STEP,
+          lon__value__lt: lon_max + GRID_STEP,
+          lat__value__gt: lat_min - GRID_STEP,
+          lat__value__lt: lat_max + GRID_STEP,
+          date__value__iexact,
+          value__lt: toKelvin(value__lt),
+          value__gt: toKelvin(value__gt),
+        };
+
+        return $.get('/lab4/t2m', request_params)
+      }
+      
+      function getFormValues() {
+        return $form.serializeArray().reduce((acc, next) => {
+          acc[next.name] = next.value;
+          return acc;
+        }, {});
+      }
+
+      function getTemperatureColor(value) {
+        const color_index = Math.round((value - MIN_TEMP_KELVIN) * WEATHER_COLORS.length / (MAX_TEMP_KELVIN - MIN_TEMP_KELVIN));
+        return WEATHER_COLORS[color_index]
+      }
+
+      const toKelvin = value => Number(value) + 273;
+      const toCelsius = value => Number(value) - 273;
+
+      function disableButton() {
+        $formButton.addClass('disabled');
+        $formButton.text('Loading...');
+      }
+
+      function enableButton() {
+        $formButton.removeClass('disabled');
+        $formButton.text('Submit');
+      }
+    </script>
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCg_a1FCF_AUuAT6uHim3fa2ldV4b28u8g&callback=initMap&libraries=visualization">
+    </script>
+{% endblock %}
